@@ -18,7 +18,6 @@
             max-width: 700px;
             margin: 40px auto;
             padding: 32px 24px 24px 24px;
-            /* Animation */
             opacity: 0;
             transform: translateY(40px);
             animation: fadeInUp 1s cubic-bezier(.23,1.01,.32,1) forwards;
@@ -41,7 +40,6 @@
         }
         textarea {
             width: 100%;
-            height: 120px;
             border-radius: 8px;
             border: 1px solid #d0d7e2;
             padding: 12px;
@@ -49,6 +47,12 @@
             margin: 10px 0 18px 0;
             background: #f7faff;
             transition: border 0.2s, box-shadow 0.3s;
+        }
+        #inputConfig {
+            height: 120px;
+        }
+        #outputConfig {
+            height: 260px; /* Bigger result box */
         }
         textarea:focus {
             border: 1.5px solid #4f8cff;
@@ -88,11 +92,34 @@
         button:hover {
             background: linear-gradient(90deg, #3267d6, #4f8cff);
         }
+        .copy-btn {
+            width: 100%;
+            margin-top: 6px;
+            margin-bottom: 12px;
+            padding: 12px 0;
+        }
         .footer {
             text-align: center;
             color: #888;
             margin-top: 24px;
             font-size: 0.95em;
+        }
+        .copied-msg {
+            text-align: right;
+            color: #3267d6;
+            font-size: 0.98em;
+            font-weight: 600;
+            margin-bottom: 10px;
+            display: none;
+        }
+        .copied-msg.show {
+            display: block;
+            animation: fadeOut 2s forwards;
+        }
+        @keyframes fadeOut {
+            0% { opacity: 1; }
+            80% { opacity: 1; }
+            100% { opacity: 0; }
         }
     </style>
 </head>
@@ -103,10 +130,11 @@
         <textarea id="inputConfig" placeholder="vless://..."></textarea>
         <div class="btn-group">
             <button onclick="addEncryption()">Convert</button>
-            <button onclick="downloadHC()">Download .hc</button>
         </div>
         <label for="outputConfig">Result:</label>
+        <div class="copied-msg" id="copiedMsg">Copied!</div>
         <textarea id="outputConfig" readonly></textarea>
+        <button class="copy-btn" onclick="copyResult()">Copy Result</button>
         <div class="footer">Made with ❤️ for HTTP Custom users</div>
     </div>
     <script>
@@ -144,21 +172,19 @@
             outputArea.classList.add('highlight');
         }
 
-        function downloadHC() {
-            const output = document.getElementById('outputConfig').value;
-            if (!output.trim()) {
-                alert('Please convert your configs first!');
+        function copyResult() {
+            const outputArea = document.getElementById('outputConfig');
+            if (!outputArea.value.trim()) {
+                alert('Nothing to copy!');
                 return;
             }
-            const blob = new Blob([output], { type: 'text/plain' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'vless-config.hc';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
+            outputArea.select();
+            outputArea.setSelectionRange(0, 99999); // For mobile devices
+            document.execCommand('copy');
+            // Show copied message
+            const msg = document.getElementById('copiedMsg');
+            msg.classList.add('show');
+            setTimeout(() => msg.classList.remove('show'), 1800);
         }
     </script>
 </body>
