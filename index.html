@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>VLESS Config Editor</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        textarea {
+            width: 100%;
+            height: 150px;
+            margin: 10px 0;
+        }
+        button {
+            padding: 10px 15px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <h1>VLESS Config Editor</h1>
+    <p>Paste your VLESS config links below (one per line)</p>
+    
+    <textarea id="inputConfig" placeholder="vless://..."></textarea>
+    <button onclick="addEncryption()">Add encryption=none</button>
+    <p>Result:</p>
+    <textarea id="outputConfig" readonly></textarea>
+    
+    <script>
+        function addEncryption() {
+            const input = document.getElementById('inputConfig').value.trim();
+            const lines = input.split('\n');
+            const results = [];
+            
+            for (let line of lines) {
+                if (line.trim() === '') continue;
+                
+                // Check if it's a VLESS config
+                if (line.startsWith('vless://')) {
+                    // Check if it already has encryption=none
+                    if (line.includes('encryption=none')) {
+                        results.push(line);
+                    } else {
+                        // Add encryption=none after security=none if present
+                        if (line.includes('security=none')) {
+                            line = line.replace('security=none', 'security=none&encryption=none');
+                        } else {
+                            // If no security parameter, add both after the first ?
+                            const [base, query] = line.split('?');
+                            if (query) {
+                                line = `${base}?security=none&encryption=none&${query}`;
+                            } else {
+                                line = `${line}?security=none&encryption=none`;
+                            }
+                        }
+                        results.push(line);
+                    }
+                } else {
+                    results.push(line + ' (Not a VLESS config)');
+                }
+            }
+            
+            document.getElementById('outputConfig').value = results.join('\n');
+        }
+    </script>
+</body>
+</html>
